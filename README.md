@@ -1,3 +1,12 @@
+<!-- 
+============================================================
+Copyright © 2025 Sebastian Holländer
+Alle Rechte vorbehalten.
+
+Kontakt: Sebastian.j.hollaender@gmail.com
+============================================================
+-->
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -224,7 +233,10 @@ function createCustomerCard(index, customerData) {
   card.innerHTML = ''
     + '<div class="card-header d-flex justify-content-between align-items-center">'
     + '  <div><strong>Kunde</strong> <span class="cust-number">#' + index + '</span></div>'
-    + '  <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-customer">Kunden entfernen</button>'
+    + '  <div class="d-flex gap-2">'
+    + '    <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischenreport kopieren</button>'  /* === Zwischenreport Button === */
+    + '    <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-customer">Kunden entfernen</button>'
+    + '  </div>'
     + '</div>'
     + '<div class="card-body">'
     + '  <div class="row g-3 mb-3">'
@@ -249,6 +261,7 @@ function createCustomerCard(index, customerData) {
     + '  <div class="d-grid gap-2 mb-2">'
     + '    <button type="button" class="btn btn-secondary" data-action="addPerson">Weitere Person hinzufügen</button>'
     + '  </div>'
+    + '  <small class="text-success d-none interim-copy-success">Zwischenreport in die Zwischenablage kopiert.</small>' /* === Zwischenreport Erfolgshinweis === */
     + '</div>';
 
   initWeekUIForCard(card, selectedDays);
@@ -480,6 +493,11 @@ customersContainer.addEventListener('click', function(e){
     renumberPersons(card);
     saveAllToCookies();
   }
+
+  /* === Zwischenreport: Button-Handler === */
+  if (action === 'copy-interim') {
+    copyInterimReport(card);
+  }
 });
 customersContainer.addEventListener('input', function(e){
   if (e.target && e.target.closest('.customer-card')) { saveAllToCookies(); }
@@ -666,10 +684,11 @@ function runReport(){
     + '</div>';
   document.getElementById('printArea').innerHTML = printHTML;
 
+  var modal = new bootstrap.Modal(document.getElementById('reportModal'));
   modal.show();
 }
 
-// Kopieren
+// Kopieren (Gesamtreport)
 function copyReport(){
   var text = (document.getElementById('combinedReportText')||{textContent:''}).textContent || '';
   if (!text.trim()) { alert('Bitte zuerst den Report erstellen.'); return; }
@@ -718,7 +737,94 @@ function printReport(){
 document.getElementById('printBtn').addEventListener('click', printReport);
 document.getElementById('printBtnBottom').addEventListener('click', printReport);
 
-// Start
+/* === Zwischenreport: Builder & Kopieren pro Kunde === */
+function buildInterimReportForCard(card) {
+  // KW bestimmen
+  var iso = getISOWeek(new Date());
+  var kwStr = 'Kalenderwoche: KW ' + iso.week + '/' + iso.year;
+
+  // Kundendaten
+  var kundennameRaw = ((card.querySelector('.kundenName')||{value:''}).value || '').trim() || '-';
+  var kundenname = kundennameRaw;
+  var kundennr = ((card.querySelector('.kundenNummer')||{value:''}).value || '').trim() || '-';
+  var auftrag = ((card.querySelector('.auftragNummer')||{value:''}).value || '').trim() || '-';
+
+  // Anwesenheitstage
+  var checkedLabels = [];
+  card.querySelectorAll('.btn-check.wkday:checked').forEach(function(cb){
+    var lbl = cb.nextElementSibling ? cb.nextElementSibling.textContent : '';
+    if (lbl) checkedLabels.push(lbl);
+  });
+  var checkedDaysText = checkedLabels.join(', ') || '-';
+
+  // Personen & Summen
+  var personBlocks = card.querySelectorAll('.personenContainer .person');
+  if (!personBlocks.length) {
+    throw new Error('Bitte mindestens eine Person beim Kunden erfassen.');
+  }
+
+  var gesamtSum = 0, fehlerSum = 0;
+  var personsText = '';
+
+  for (var i=0; i<personBlocks.length; i++) {
+    var block = personBlocks[i];
+    var nameRaw = (block.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (i+1));
+    var gesamtInput = block.querySelector('.gesamt');
+    var fehlerInput = block.querySelector('.fehler');
+
+    normalizeIntegerInput(gesamtInput);
+    normalizeIntegerInput(fehlerInput);
+
+    var gesamt = parseInt((gesamtInput||{value:''}).value, 10);
+    var fehler = parseInt((fehlerInput||{value:''}).value, 10);
+
+    if (!isFinite(gesamt) || !isFinite(fehler)) {
+      throw new Error('Bitte alle Pflichtfelder (Prüfungen/Nicht bestanden) ausfüllen.');
+    }
+    if (fehler > gesamt) {
+      throw new Error('Bei "' + nameRaw + '": "Nicht bestanden" darf nicht größer als "Prüfungen" sein.');
+    }
+
+    var q = gesamt > 0 ? (fehler / gesamt) * 100 : 0;
+    personsText += nameRaw + ': Prüfungen: ' + gesamt + ', Nicht bestanden: ' + fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
+    gesamtSum += gesamt; fehlerSum += fehler;
+  }
+
+  var qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
+
+  // Text zusammenstellen (mit gewünschter Überschrift "Zwischenreport")
+  var txt =
+    'Zwischenreport\n'
+    + kwStr + '\n\n'
+    + 'Kunde: ' + kundenname + '\n'
+    + 'Kundennummer: ' + kundennr + '\n'
+    + 'Auftragsnummer: ' + auftrag + '\n'
+    + 'Anwesenheitstage: ' + checkedDaysText + '\n'
+    + personsText
+    + 'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %';
+
+  return txt;
+}
+function copyInterimReport(card) {
+  var successEl = card.querySelector('.interim-copy-success');
+  function showInlineSuccess(){
+    if (successEl) { successEl.classList.remove('d-none'); setTimeout(function(){ successEl.classList.add('d-none'); }, 2000); }
+  }
+  try {
+    var text = buildInterimReportForCard(card);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ showInlineSuccess(); }, function(){
+        fallbackCopyAll(text, showInlineSuccess);
+      });
+    } else {
+      fallbackCopyAll(text, showInlineSuccess);
+    }
+  } catch(err) {
+    alert(err.message || 'Zwischenreport konnte nicht erstellt werden.');
+  }
+}
+
+/* ===== Start ===== */
 (function init(){
   var payload = loadAllFromCookies();
   buildUIFromData(payload);
