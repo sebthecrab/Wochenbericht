@@ -505,7 +505,7 @@ function runReport(){
 
     const qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
     const collapseId = 'custCollapse_' + custIndex;
-    combinedHTML += '<div class="card mb-3 report-card avoid-break"><div class="print-block"><div class="card-header"><a class="text-decoration-none d-block" data-bs-toggle="collapse" href="#'+collapseId+'" role="button" aria-expanded="true" aria-controls="'+collapseId+'"><strong>Kunde #'+custIndex+ (cust.name !== '-' ? (': ' + escapeHTML(cust.name)) : '') + '</strong></a></div><div id="'+collapseId+'" class="collapse show"><div class="card-body"><div class="row mb-2"><div class="col-12 col-md-4"><strong>Kundennummer:</strong> '+ escapeHTML(cust.number || '-') +'</div><div class="col-12 col-md-4"><strong>Auftragsnummer:</strong> '+ escapeHTML(cust.order || '-') +'</div><div class="col-12 col-md-4"><strong>Anmerkung:</strong> -</div></div><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>'+personsRows+'</tbody><tfoot><tr><th>Summe</th><th>'+gesamtSum+'</th><th>'+fehlerSum+'</th><th>'+qGes.toFixed(2)+' %</th></tr></tfoot></table></div></div></div></div>';
+    combinedHTML += '<div class="card mb-3 report-card avoid-break"><div class="print-block"><div class="card-header"><a class="text-decoration-none d-block" data-bs-toggle="collapse" href="#'+collapseId+'" role="button" aria-expanded="true" aria-controls="'+collapseId+'"><strong>Kunde #'+custIndex+ (cust.name !== '-' ? (': ' + escapeHTML(cust.name)) : '') + '</strong></a></div><div id="'+collapseId+'" class="collapse show"><div class="card-body"><div class="row mb-2"><div class="col-12 col-md-4"><strong>Kundennummer:</strong> '+ escapeHTML(cust.number || '-') +'</div><div class="col-12 col-md-4"><strong>Auftragsnummer:</strong> '+ escapeHTML(cust.order || '-') +'</div><div class="col-12 col-md-4"><strong>Anmerkung:</strong> -</div></div><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>'+personsRows+'</tbody><tfoot><tr><th>Summe</th><th>'+gesamtSum+'</th><th>'+fehlerSum+'</th><th>'+qGes.toFixed(2)+' %</th></tr></tfoot></table></div></div></div></div></div>';
 
     combinedText += 'Kunde: ' + (cust.name !== '-' ? cust.name : '-') + '\n' + 'Kundennummer: ' + (cust.number || '-') + '\n' + 'Auftragsnummer: ' + (cust.order || '-') + '\n' + personsText + 'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %\n\n';
   });
@@ -750,10 +750,10 @@ function generateCustomerMultiWeekReport(card){
     aggRows += '<tr><td>'+escapeHTML(k)+'</td><td>'+s.pruef+'</td><td>'+s.fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
   });
 
-  const aggBlock = '<h5>Gesamtergebnis (über alle betrachteten Wochen)</h5><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>' + aggRows + '</tbody><tfoot><tr><th>Summe</th><th>' + totalPruef + '</th><th>' + totalFehler + '</th><th>' + (totalPruef>0 ? ((totalFehler/totalPruef)*100).toFixed(2) + ' %' : '0.00 %') + '</th></tr></tfoot></table></div>';
+  const aggBlock = '<h5 class="avoid-break">Gesamtergebnis (über alle betrachteten Wochen)</h5><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>' + aggRows + '</tbody><tfoot><tr><th>Summe</th><th>' + totalPruef + '</th><th>' + totalFehler + '</th><th>' + (totalPruef>0 ? ((totalFehler/totalPruef)*100).toFixed(2) + ' %' : '0.00 %') + '</th></tr></tfoot></table></div>';
 
   // include Kundendaten in header (requested)
-  const header = '<h4>Kunden-Zusammenfassung: ' + escapeHTML(name) + '</h4>' +
+  const header = '<h4>Kunden-Zusammenfassung: <br>' + escapeHTML(name) + '</h4>' +
                  '<p><strong>Kundennummer:</strong> ' + escapeHTML(number) + ' &nbsp;&nbsp; <strong>Auftragsnummer:</strong> ' + escapeHTML(order) + '</p>' +
                  '<p>Betrachtete Wochen: ' + weekDetails.length + '</p>';
 
@@ -791,7 +791,7 @@ function generateCustomerMultiWeekReport(card){
   document.getElementById('pQuote').style.display = 'none';
 
   // prepare printable content for this multi-week report and put into printArea so printReport() works
-  const printHtml = '<div><h2 class="h4">Kunden-Zusammenfassung</h2><div class="mb-2"><strong>Kunde:</strong> ' + escapeHTML(name) + ' &nbsp;&nbsp; <strong>Kundennummer:</strong> ' + escapeHTML(number) + ' &nbsp;&nbsp; <strong>Auftragsnummer:</strong> ' + escapeHTML(order) + '</div>' + document.getElementById('combinedReportContent').innerHTML + '</div>';
+  const printHtml = '<div>' + document.getElementById('combinedReportContent').innerHTML + '</div>';
   document.getElementById('printArea').innerHTML = printHtml;
 
   const modal = new bootstrap.Modal(document.getElementById('reportModal'));
