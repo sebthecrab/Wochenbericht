@@ -6,37 +6,31 @@ Alle Rechte vorbehalten.
 Kontakt: Sebastian.j.hollaender@gmail.com
 ============================================================
 -->
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wochen Kurzbericht</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Wochen Kurzbericht — Multiweek</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
-    .copy-success { display:none; }
-    .required:after { content:" *"; color:red; }
-    .badge-toggle { cursor: pointer; user-select: none; background-color: var(--bs-secondary-bg); color: var(--bs-body-color); border: 1px solid var(--bs-border-color); transition: all .15s ease-in-out; }
-    .badge-toggle:hover { filter: brightness(0.97); }
-    .btn-check:checked + .badge-toggle { background-color: var(--bs-primary); color: #fff; border-color: var(--bs-primary); }
-    .customer-card { background:#fff; }
-    .table-sm td, .table-sm th { padding: .25rem .5rem; }
-    #copyAlert.sticky-alert { position: sticky; top: 0; z-index: 1056; }
-    #printArea { display: none; }
-
-    /* Druck-Optimierung */
-    @page { margin: 10mm; }
-    @media print {
-      .report-card, .report-table, .print-block, .rollup-block,
-      .report-table thead, .report-table tbody, .report-table tr, .report-table td, .report-table th {
-        break-inside: avoid;
-        page-break-inside: avoid;
+    .copy-success{display:none}
+    .required:after{content:" *";color:red}
+    .badge-toggle{cursor:pointer;user-select:none;background-color:var(--bs-secondary-bg);color:var(--bs-body-color);border:1px solid var(--bs-border-color);transition:all .15s ease-in-out}
+    .badge-toggle:hover{filter:brightness(0.97)}
+    .btn-check:checked + .badge-toggle{background-color:var(--bs-primary);color:#fff;border-color:var(--bs-primary)}
+    .customer-card{background:#fff}
+    .table-sm td,.table-sm th{padding:.25rem .5rem}
+    #copyAlert.sticky-alert{position:sticky;top:0;z-index:1056}
+    #printArea{display:none}
+    .toast-fixed{position:fixed;right:20px;bottom:20px;z-index:1080}
+    @page{margin:10mm}
+    @media print{
+      .report-card,.report-table,.print-block,.rollup-block,
+      .report-table thead,.report-table tbody,.report-table tr,.report-table td,.report-table th{
+        break-inside:avoid;page-break-inside:avoid;
       }
-      h1, h2, h3, h4, h5, h6 {
-        break-after: avoid-page;
-        page-break-after: avoid;
-      }
+      h1,h2,h3,h4,h5,h6{break-after:avoid-page;page-break-after:avoid}
     }
   </style>
 </head>
@@ -46,6 +40,15 @@ Kontakt: Sebastian.j.hollaender@gmail.com
   <div class="row justify-content-center">
     <div class="col-12 col-xl-10">
       <h1 class="h4 mb-2">Wochen Kurzbericht</h1>
+
+      <!-- Woche-Navigation -->
+      <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+        <div class="d-flex gap-2">
+          <button id="prevWeek" type="button" class="btn btn-outline-secondary btn-sm">&larr; Vorherige KW</button>
+          <button id="nextWeek" type="button" class="btn btn-outline-secondary btn-sm">Nächste KW &rarr;</button>
+        </div>
+        <div id="currentWeekDisplay" class="fw-semibold"></div>
+      </div>
 
       <!-- Obere Buttons -->
       <div class="d-grid gap-2 gap-sm-2 d-sm-flex justify-content-sm-end mb-3">
@@ -98,10 +101,7 @@ Kontakt: Sebastian.j.hollaender@gmail.com
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- Sticky Copy-Alert -->
-        <div id="copyAlert" class="alert alert-success d-none py-2 px-3 sticky-alert" role="alert">
-          Daten wurden in die Zwischenablage übernommen.
-        </div>
+        <div id="copyAlert" class="alert alert-success d-none py-2 px-3 sticky-alert" role="alert">Daten wurden in die Zwischenablage übernommen.</div>
 
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
           <div id="globalKWDisplay" class="fw-semibold"></div>
@@ -121,12 +121,7 @@ Kontakt: Sebastian.j.hollaender@gmail.com
           <div class="table-responsive">
             <table class="table table-sm table-bordered mb-2 report-table avoid-break">
               <thead>
-                <tr>
-                  <th>Person</th>
-                  <th>Prüfungen</th>
-                  <th>Nicht bestanden</th>
-                  <th>Fehlerquote</th>
-                </tr>
+                <tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr>
               </thead>
               <tbody id="personsRollupTable"></tbody>
             </table>
@@ -138,7 +133,6 @@ Kontakt: Sebastian.j.hollaender@gmail.com
         <p id="pFehler"><strong>GESAMT Nicht bestanden (alle Kunden):</strong> <span id="allFehlerSumme"></span></p>
         <p id="pQuote"><strong>GESAMT Fehlerquote (alle Kunden):</strong> <span id="allFehlerQuoteGesamt"></span></p>
 
-        <!-- Buttons am Ende -->
         <div class="d-flex justify-content-end gap-2 mt-3 flex-wrap">
           <button id="copyAllBtnBottom" type="button" class="btn btn-sm btn-outline-dark">Report kopieren</button>
           <button id="printBtnBottom" type="button" class="btn btn-sm btn-dark">Als PDF drucken</button>
@@ -153,364 +147,300 @@ Kontakt: Sebastian.j.hollaender@gmail.com
   </div>
 </div>
 
+<!-- Toast container for inline feedback -->
+<div id="toastContainer" class="toast-fixed"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-/* ===== Storage-Helpers (localStorage anstelle Cookies) ===== */
-function setCookie(key, valueJson, days) {
-  try { localStorage.setItem(key, valueJson); } catch(e) {}
+/* Storage helpers (localStorage) */
+const STORE_KEY = 'wk_store_v1';
+function setLocal(key, value){ try { localStorage.setItem(key, value); } catch(e) {} }
+function getLocal(key){ try { return localStorage.getItem(key); } catch(e){ return null; } }
+function loadStore(){ const raw = getLocal(STORE_KEY); if (!raw) return {}; try { return JSON.parse(raw) || {}; } catch(e){ return {}; } }
+function saveStore(obj){ setLocal(STORE_KEY, JSON.stringify(obj)); }
+
+/* Week helpers */
+function getMondayOfCurrentWeek(date){ if (!date) date = new Date(); const d = new Date(date); const day = d.getDay(); const diff = (day === 0 ? -6 : 1 - day); d.setDate(d.getDate() + diff); d.setHours(0,0,0,0); return d; }
+function getISOWeek(d){ if (!d) d = new Date(); const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dayNum = date.getUTCDay() || 7; date.setUTCDate(date.getUTCDate() + 4 - dayNum); const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1)); const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7); return { week: weekNo, year: date.getUTCFullYear() }; }
+function getWeekKey(d){ const iso = getISOWeek(d); return iso.year + '-W' + String(iso.week).padStart(2,'0'); }
+function parseWeekKey(k){ try{ const m = (''+k).match(/^(\d{4})-W(\d{2})$/); if (!m) return null; return { year: Number(m[1]), week: Number(m[2]) }; }catch(e){ return null; } }
+function addDays(d, days){ const nd = new Date(d); nd.setDate(nd.getDate() + days); return nd; }
+function isoWeekStart(year, week){
+  const jan4 = new Date(Date.UTC(year,0,4));
+  const jan4Day = jan4.getUTCDay() || 7;
+  const monday = new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate() - (jan4Day - 1) + (week - 1) * 7);
+  monday.setUTCHours(0,0,0,0);
+  return monday;
 }
-function getCookie(key) {
-  try { return localStorage.getItem(key); } catch(e) { return null; }
-}
-function clearAllCookies() {
-  try {
-    Object.keys(localStorage).forEach(function(k){
-      if (k.startsWith('wk_')) localStorage.removeItem(k);
-    });
-  } catch(e) {}
+function getWeekLabelFromKey(k){
+  const p = parseWeekKey(k);
+  if (!p) return k;
+  const start = isoWeekStart(p.year, p.week);
+  return 'KW ' + p.week + '/' + p.year + ' (Mo ' + formatDE(start) + ')';
 }
 
-/* ===== Utils ===== */
-function escapeHTML(str){
-  if (str === null || str === undefined) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-function getMondayOfCurrentWeek(date) {
-  if (!date) date = new Date();
-  var d = new Date(date);
-  var day = d.getDay();
-  var diff = (day === 0 ? -6 : 1 - day);
-  d.setDate(d.getDate() + diff);
-  d.setHours(0,0,0,0);
-  return d;
-}
-function getISOWeek(d) {
-  if (!d) d = new Date();
-  var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  var dayNum = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-  var yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
-  var weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-  return { week: weekNo, year: date.getUTCFullYear() };
-}
-function formatDE(date) { return date.toLocaleDateString('de-DE'); }
-function weekdayDE(date) { return date.toLocaleDateString('de-DE', { weekday: 'long' }); }
+/* Utils */
+function escapeHTML(str){ if (str === null || str === undefined) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;'); }
+function formatDE(date){ return date.toLocaleDateString('de-DE'); }
+function weekdayDE(date){ return date.toLocaleDateString('de-DE',{weekday:'long'}); }
 
-// Zahlen nur ganzzahlig
-function normalizeIntegerInput(el) {
-  if (!el || el.value === '') return;
-  var num = Number(String(el.value).replace(',', '.'));
-  if (!isFinite(num)) { el.value=''; return; }
-  num = Math.round(num);
-  var min = el.hasAttribute('min') ? Number(el.getAttribute('min')) : undefined;
-  var max = el.hasAttribute('max') ? Number(el.getAttribute('max')) : undefined;
-  if (isFinite(min) && num < min) num = min;
-  if (isFinite(max) && num > max) num = max;
-  el.value = String(num);
-}
-function attachIntegerHandlers(scope) {
-  if (!scope) scope = document;
-  var ints = scope.querySelectorAll('.integer-only');
-  ints.forEach(function(el){
-    el.addEventListener('input', function(){ el.value = el.value.replace(/[^0-9]/g, ''); });
-    el.addEventListener('blur', function(){ normalizeIntegerInput(el); });
-    el.addEventListener('change', function(){ normalizeIntegerInput(el); });
-  });
+/* Integer inputs */
+function normalizeIntegerInput(el){ if (!el || el.value === '') return; let num = Number(String(el.value).replace(',', '.')); if (!isFinite(num)){ el.value=''; return; } num = Math.round(num); const min = el.hasAttribute('min') ? Number(el.getAttribute('min')) : undefined; const max = el.hasAttribute('max') ? Number(el.getAttribute('max')) : undefined; if (isFinite(min) && num < min) num = min; if (isFinite(max) && num > max) num = max; el.value = String(num); }
+function attachIntegerHandlers(scope){ if (!scope) scope = document; const ints = scope.querySelectorAll('.integer-only'); ints.forEach(el=>{ el.addEventListener('input', ()=>{ el.value = el.value.replace(/[^0-9]/g,''); }); el.addEventListener('blur', ()=>normalizeIntegerInput(el)); el.addEventListener('change', ()=>normalizeIntegerInput(el)); }); }
+
+/* Toast helper */
+function showToast(message, type='info', timeout=2200){
+  const container = document.getElementById('toastContainer');
+  const toastId = 't'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  const bg = (type==='success') ? 'bg-success text-white' : (type==='danger' ? 'bg-danger text-white' : 'bg-dark text-white');
+  const toastEl = document.createElement('div');
+  toastEl.className = 'toast p-2 mb-2 ' + bg;
+  toastEl.role = 'alert';
+  toastEl.ariaLive = 'assertive';
+  toastEl.ariaAtomic = 'true';
+  toastEl.id = toastId;
+  toastEl.innerHTML = '<div class="small">'+escapeHTML(message)+'</div>';
+  container.appendChild(toastEl);
+  setTimeout(()=>{ toastEl.classList.add('show'); }, 10);
+  setTimeout(()=>{ try{ toastEl.classList.remove('show'); container.removeChild(toastEl); }catch(e){} }, timeout);
 }
 
-/* ===== Kunden-UI ===== */
-function createCustomerCard(index, customerData) {
-  customerData = customerData || {};
-  var nameVal = customerData.name ? String(customerData.name) : '';
-  var numberVal = customerData.number ? String(customerData.number) : '';
-  var orderVal = customerData.order ? String(customerData.order) : '';
-  var personsArr = (customerData.persons && Array.isArray(customerData.persons)) ? customerData.persons : [''];
-  var selectedDays = (customerData.selectedDays && Array.isArray(customerData.selectedDays) && customerData.selectedDays.length===5) ? customerData.selectedDays : [true,true,true,true,false];
+/* UI / Data model */
+let customersContainer = document.getElementById('customersContainer');
+let currentWeekDate = getMondayOfCurrentWeek(new Date());
+let currentWeekKey = getWeekKey(currentWeekDate);
+let realWeekDate = getMondayOfCurrentWeek(new Date()); // today's week start
+let realWeekKey = getWeekKey(realWeekDate);
 
-  var card = document.createElement('div');
+function updateWeekDisplay(){ const iso = getISOWeek(currentWeekDate); const txt = 'KW ' + iso.week + '/' + iso.year + ' (Montag: ' + formatDE(currentWeekDate) + ')'; const el = document.getElementById('currentWeekDisplay'); if (el) el.textContent = txt; }
+
+/* Card generation */
+function createCustomerCard(index, customerData = {}){
+  const nameVal = customerData.name || '';
+  const numberVal = customerData.number || '';
+  const orderVal = customerData.order || '';
+  const personsArr = Array.isArray(customerData.persons) ? customerData.persons : [''];
+  const selectedDays = (Array.isArray(customerData.selectedDays) && customerData.selectedDays.length===5) ? customerData.selectedDays : [true,true,true,true,false];
+
+  const card = document.createElement('div');
   card.className = 'card customer-card shadow-sm';
   card.dataset.customerIndex = index;
-  card.innerHTML = ''
-    + '<div class="card-header d-flex justify-content-between align-items-center">'
-    + '  <div><strong>Kunde</strong> <span class="cust-number">#' + index + '</span></div>'
-    + '  <div class="d-flex gap-2">'
-    + '    <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischenreport kopieren</button>'  /* === Zwischenreport Button === */
-    + '    <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-customer">Kunden entfernen</button>'
-    + '  </div>'
-    + '</div>'
-    + '<div class="card-body">'
-    + '  <div class="row g-3 mb-3">'
-    + '    <div class="col-12 col-md-6">'
-    + '      <label class="form-label">Kundenname</label>'
-    + '      <input type="text" class="form-control kundenName" placeholder="Optional" value="' + nameVal.replace(/"/g,'&quot;') + '">'
-    + '    </div>'
-    + '    <div class="col-12 col-md-3">'
-    + '      <label class="form-label">Kundennummer</label>'
-    + '      <input type="text" class="form-control kundenNummer" placeholder="Optional" value="' + numberVal.replace(/"/g,'&quot;') + '">'
-    + '    </div>'
-    + '    <div class="col-12 col-md-3">'
-    + '      <label class="form-label">Auftragsnummer</label>'
-    + '      <input type="text" class="form-control auftragNummer" placeholder="Optional" value="' + orderVal.replace(/"/g,'&quot;') + '">'
-    + '    </div>'
-    + '    <div class="col-12">'
-    + '      <label class="form-label mb-2">Anwesenheitstage beim Kunden (aktuelle Kalenderwoche)</label>'
-    + '      <div class="dayCheckboxes d-flex flex-wrap gap-2"></div>'
-    + '    </div>'
-    + '  </div>'
-    + '  <div class="personenContainer"></div>'
-    + '  <div class="d-grid gap-2 mb-2">'
-    + '    <button type="button" class="btn btn-secondary" data-action="addPerson">Weitere Person hinzufügen</button>'
-    + '  </div>'
-    + '  <small class="text-success d-none interim-copy-success">Zwischenreport in die Zwischenablage kopiert.</small>' /* === Zwischenreport Erfolgshinweis === */
-    + '</div>';
+
+  card.innerHTML = `
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div><strong>Kunde</strong> <span class="cust-number">#${index}</span></div>
+      <div class="d-flex gap-2 align-items-center">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-to-current">In aktuelle KW kopieren</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="multiweek-report">Multi-Wochen Report</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischenreport kopieren</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-customer">Kunden entfernen</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 mb-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Kundenname</label>
+          <input type="text" class="form-control kundenName" placeholder="Optional" value="${escapeHTML(nameVal)}">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Kundennummer</label>
+          <input type="text" class="form-control kundenNummer" placeholder="Optional" value="${escapeHTML(numberVal)}">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Auftragsnummer</label>
+          <input type="text" class="form-control auftragNummer" placeholder="Optional" value="${escapeHTML(orderVal)}">
+        </div>
+        <div class="col-12">
+          <label class="form-label mb-2">Anwesenheitstage beim Kunden (aktuelle Kalenderwoche)</label>
+          <div class="dayCheckboxes d-flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+      <div class="personenContainer"></div>
+      <div class="d-grid gap-2 mb-2">
+        <button type="button" class="btn btn-secondary" data-action="addPerson">Weitere Person hinzufügen</button>
+      </div>
+      <small class="text-success d-none interim-copy-success">Zwischenreport in die Zwischenablage kopiert.</small>
+    </div>`;
 
   initWeekUIForCard(card, selectedDays);
-  for (var i=0; i<personsArr.length; i++) {
-    addPersonToCard(card, i+1, personsArr[i] || '', customerData.storeValues ? customerData.values && customerData.values[i] : null);
-  }
+  personsArr.forEach((p,i)=> addPersonToCard(card, i+1, p || '', customerData.values && customerData.values[i] ? customerData.values[i] : null));
   attachIntegerHandlers(card);
   return card;
 }
-function initWeekUIForCard(card, selectedDays) {
-  if (!selectedDays) selectedDays = [true,true,true,true,false];
-  var monday = getMondayOfCurrentWeek(new Date());
-  var dayContainer = card.querySelector('.dayCheckboxes');
-  dayContainer.innerHTML = '';
 
-  for (var i=0; i<5; i++) {
-    var d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    var id = 'wkday_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    var labelText = weekdayDE(d);
+function initWeekUIForCard(card, selectedDays = [true,true,true,true,false]){
+  const monday = getMondayOfCurrentWeek(new Date(currentWeekDate));
+  const dayContainer = card.querySelector('.dayCheckboxes'); dayContainer.innerHTML = '';
+  for (let i=0;i<5;i++){
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    const id = 'wkday_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    let labelText = weekdayDE(d);
     labelText = labelText.charAt(0).toUpperCase() + labelText.slice(1) + ' (' + formatDE(d) + ')';
-
-    var input = document.createElement('input');
-    input.type = 'checkbox';
-    input.className = 'btn-check wkday';
-    input.id = id;
-    input.autocomplete = 'off';
-    input.setAttribute('data-date', d.toISOString());
-    if (selectedDays[i]) input.checked = true;
-
-    var label = document.createElement('label');
-    label.className = 'badge rounded-pill badge-toggle px-3 py-2';
-    label.setAttribute('for', id);
-    label.textContent = labelText;
-
-    dayContainer.appendChild(input);
-    dayContainer.appendChild(label);
+    const input = document.createElement('input'); input.type='checkbox'; input.className='btn-check wkday'; input.id=id; input.autocomplete='off'; input.setAttribute('data-date', d.toISOString()); if (selectedDays[i]) input.checked=true;
+    const label = document.createElement('label'); label.className='badge rounded-pill badge-toggle px-3 py-2'; label.setAttribute('for', id); label.textContent = labelText;
+    dayContainer.appendChild(input); dayContainer.appendChild(label);
   }
-  dayContainer.addEventListener('change', function(){ saveAllToCookies(); });
-}
-function addPersonToCard(card, index, nameValue, valueObj) {
-  var container = card.querySelector('.personenContainer');
-  var wrapper = document.createElement('div');
-  wrapper.className = 'person mb-3 p-3 border rounded';
-  var gesVal = valueObj && typeof valueObj.gesamt === 'number' ? String(valueObj.gesamt) : '';
-  var fehVal = valueObj && typeof valueObj.fehler === 'number' ? String(valueObj.fehler) : '';
-  wrapper.innerHTML = ''
-    + '<div class="d-flex justify-content-between align-items-center mb-2">'
-    + '  <h5 class="mb-0">Person ' + index + '</h5>'
-    + '  <div class="d-flex gap-2">'
-    + '    <button type="button" class="btn btn-sm btn-outline-danger" data-action="removePerson">Entfernen</button>'
-    + '  </div>'
-    + '</div>'
-    + '<div class="mb-3">'
-    + '  <label class="form-label">Name (optional)</label>'
-    + '  <input type="text" class="form-control name" placeholder="Name der Person" value="' + (nameValue ? String(nameValue).replace(/"/g,'&quot;') : '') + '">'
-    + '</div>'
-    + '<div class="mb-3">'
-    + '  <label class="form-label required">Anzahl der Prüfungen</label>'
-    + '  <input type="number" class="form-control gesamt integer-only" placeholder="z. B. 50" min="0" step="1" inputmode="numeric" pattern="\\d*" required value="' + gesVal + '">'
-    + '</div>'
-    + '<div class="mb-3">'
-    + '  <label class="form-label required">Anzahl der nicht bestandenen Prüfungen</label>'
-    + '  <input type="number" class="form-control fehler integer-only" placeholder="z. B. 7" min="0" step="1" inputmode="numeric" pattern="\\d*" required value="' + fehVal + '">'
-    + '</div>';
-  container.appendChild(wrapper);
-  attachIntegerHandlers(wrapper);
-}
-function renumberPersons(card) {
-  var persons = card.querySelectorAll('.personenContainer .person');
-  persons.forEach(function(p, idx){
-    var h5 = p.querySelector('h5');
-    if (h5) h5.textContent = 'Person ' + (idx + 1);
-  });
+  dayContainer.addEventListener('change', saveAllToCookies);
 }
 
-/* ===== Daten sammeln/speichern ===== */
-function collectAllData() {
-  var storeValues = document.getElementById('storeValues').checked;
-  var storeNames = document.getElementById('storeNames').checked;
-  var storeCustomer = document.getElementById('storeCustomer').checked;
+function addPersonToCard(card, index, nameValue, valueObj){
+  const container = card.querySelector('.personenContainer');
+  const wrapper = document.createElement('div'); wrapper.className = 'person mb-3 p-3 border rounded';
+  const gesVal = (valueObj && typeof valueObj.gesamt === 'number') ? String(valueObj.gesamt) : '';
+  const fehVal = (valueObj && typeof valueObj.fehler === 'number') ? String(valueObj.fehler) : '';
+  wrapper.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Person ${index}</h5>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-danger" data-action="removePerson">Entfernen</button>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Name (optional)</label>
+      <input type="text" class="form-control name" placeholder="Name der Person" value="${escapeHTML(nameValue || '')}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label required">Anzahl der Prüfungen</label>
+      <input type="number" class="form-control gesamt integer-only" placeholder="z. B. 50" min="0" step="1" inputmode="numeric" pattern="\\d*" required value="${gesVal}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label required">Anzahl der nicht bestandenen Prüfungen</label>
+      <input type="number" class="form-control fehler integer-only" placeholder="z. B. 7" min="0" step="1" inputmode="numeric" pattern="\\d*" required value="${fehVal}">
+    </div>`;
+  container.appendChild(wrapper); attachIntegerHandlers(wrapper);
+}
 
-  var customers = [];
-  document.querySelectorAll('#customersContainer .customer-card').forEach(function(card){
-    var name = (card.querySelector('.kundenName') || {value:''}).value.trim();
-    var number = (card.querySelector('.kundenNummer') || {value:''}).value.trim();
-    var order = (card.querySelector('.auftragNummer') || {value:''}).value.trim();
+function renumberPersons(card){ const persons = card.querySelectorAll('.personenContainer .person'); persons.forEach((p,idx)=>{ const h5 = p.querySelector('h5'); if (h5) h5.textContent = 'Person ' + (idx+1); }); }
 
-    var persons = [];
-    var values = [];
-    var personBlocks = card.querySelectorAll('.personenContainer .person');
-    personBlocks.forEach(function(block){
-      var nm = (block.querySelector('.name')||{value:''}).value.trim();
-      var g = parseInt((block.querySelector('.gesamt')||{value:''}).value, 10);
-      var f = parseInt((block.querySelector('.fehler')||{value:''}).value, 10);
-
-      if (storeNames) { persons.push(nm); }
-      if (storeValues && storeNames) {
-        values.push({ gesamt: isNaN(g)? null : g, fehler: isNaN(f)? null : f });
-      }
+/* Data collect / save (week-aware) */
+function collectAllData(){ const storeValues = document.getElementById('storeValues').checked; const storeNames = document.getElementById('storeNames').checked; const storeCustomer = document.getElementById('storeCustomer').checked; const customers = [];
+  document.querySelectorAll('#customersContainer .customer-card').forEach(card=>{
+    const name = (card.querySelector('.kundenName')||{value:''}).value.trim();
+    const number = (card.querySelector('.kundenNummer')||{value:''}).value.trim();
+    const order = (card.querySelector('.auftragNummer')||{value:''}).value.trim();
+    const persons = []; const values = [];
+    card.querySelectorAll('.personenContainer .person').forEach(block=>{
+      const nm = (block.querySelector('.name')||{value:''}).value.trim();
+      const g = parseInt((block.querySelector('.gesamt')||{value:''}).value,10);
+      const f = parseInt((block.querySelector('.fehler')||{value:''}).value,10);
+      if (storeNames) persons.push(nm);
+      if (storeValues && storeNames) values.push({gesamt: isNaN(g)? null : g, fehler: isNaN(f)? null : f});
     });
-
-    var selected = [];
-    card.querySelectorAll('.dayCheckboxes .btn-check.wkday').forEach(function(cb){ selected.push(!!cb.checked); });
-
-    customers.push({
-      name: storeCustomer ? name : '',
-      number: storeCustomer ? number : '',
-      order: storeCustomer ? order : '',
-      persons: persons,
-      selectedDays: selected,
-      storeValues: storeValues && storeNames,
-      values: values
-    });
+    const selected = []; card.querySelectorAll('.dayCheckboxes .btn-check.wkday').forEach(cb => selected.push(!!cb.checked));
+    customers.push({ name: storeCustomer ? name : '', number: storeCustomer ? number : '', order: storeCustomer ? order : '', persons: persons, selectedDays: selected, storeValues: storeValues && storeNames, values: values });
   });
-
-  if (!document.getElementById('storeCustomer').checked) { customers = []; }
-
-  return { storeValues: storeValues, storeNames: storeNames, storeCustomer: storeCustomer, customers: customers };
-}
-function saveAllToCookies() {
-  var data = collectAllData();
-  if (!data.storeValues && !data.storeNames && !data.storeCustomer) {
-    clearAllCookies();
-    return;
-  }
-  setCookie('wk_customers_v3', JSON.stringify(data));
-}
-function loadAllFromCookies() {
-  var raw = getCookie('wk_customers_v3');
-  if (!raw) return null;
-  try { return JSON.parse(raw); } catch(e) { return null; }
+  return { storeValues: document.getElementById('storeValues').checked, storeNames: document.getElementById('storeNames').checked, storeCustomer: document.getElementById('storeCustomer').checked, customers: (document.getElementById('storeCustomer').checked ? customers : []) };
 }
 
-/* ===== Init & UI-Aufbau ===== */
-var customersContainer = document.getElementById('customersContainer');
+function saveAllToCookies(){ const data = collectAllData(); const store = loadStore(); store[currentWeekKey] = data; saveStore(store); }
 
-function buildUIFromData(payload) {
+/* Load for week */
+function loadAllFromCookiesForWeek(weekKey){ const store = loadStore(); return store && store[weekKey] ? store[weekKey] : null; }
+
+/* Build UI from payload */
+function buildUIFromData(payload, sourceWeekKey){
   customersContainer.innerHTML = '';
-
-  var storeValues = false, storeNames = false, storeCustomer = false, customersData = null;
-  if (payload && typeof payload === 'object') {
+  let storeValues=false, storeNames=false, storeCustomer=false, customersData=null;
+  if (payload && typeof payload === 'object'){
     if (typeof payload.storeValues === 'boolean') storeValues = payload.storeValues;
     if (typeof payload.storeNames === 'boolean') storeNames = payload.storeNames;
     if (typeof payload.storeCustomer === 'boolean') storeCustomer = payload.storeCustomer;
     customersData = Array.isArray(payload.customers) ? payload.customers : null;
   }
-
   document.getElementById('storeValues').checked = storeValues;
   document.getElementById('storeNames').checked = storeNames;
   document.getElementById('storeCustomer').checked = storeCustomer;
 
-  if (!customersData || customersData.length === 0) {
-    customersContainer.appendChild(createCustomerCard(1, { name:'', number:'', order:'', persons:[''], selectedDays:[true,true,true,true,false], storeValues:false, values:[] }));
+  // IMPORTANT: do not auto-create a default customer if none present.
+  if (!customersData || customersData.length === 0){
+    customersContainer.innerHTML = '';
+    return;
   } else {
-    customersData.forEach(function(cust, idx){
+    customersData.forEach((cust,idx)=> {
       cust.storeValues = storeValues && storeNames;
       customersContainer.appendChild(createCustomerCard(idx+1, cust));
     });
   }
 }
 
-function duplicatePersonsFromFirstCustomer() {
-  var firstCard = customersContainer.querySelector('.customer-card');
+function duplicatePersonsFromFirstCustomer(){
+  const firstCard = customersContainer.querySelector('.customer-card');
   if (!firstCard) return [''];
-  var names = [];
-  firstCard.querySelectorAll('.personenContainer .person .name').forEach(function(inp){
-    names.push((inp.value || '').trim());
-  });
-  return names.length ? names : [''];
+  const names=[];
+  firstCard.querySelectorAll('.personenContainer .person .name').forEach(inp=> names.push((inp.value||'').trim()));
+  return names.length?names:[''];
 }
 
-/* ===== Aktionen ===== */
+/* Actions */
 function addCustomerAction(){
-  var newIndex = customersContainer.querySelectorAll('.customer-card').length + 1;
-  var personsTemplate = duplicatePersonsFromFirstCustomer();
-  var firstCard = customersContainer.querySelector('.customer-card');
-  var selectedDays = [true,true,true,true,false];
-  if (firstCard) {
-    selectedDays = Array.from(firstCard.querySelectorAll('.dayCheckboxes .btn-check.wkday')).map(function(cb){ return !!cb.checked; });
+  const newIndex = customersContainer.querySelectorAll('.customer-card').length + 1;
+  const personsTemplate = duplicatePersonsFromFirstCustomer();
+  const firstCard = customersContainer.querySelector('.customer-card');
+  let selectedDays=[true,true,true,true,false];
+  if (firstCard){
+    selectedDays = Array.from(firstCard.querySelectorAll('.dayCheckboxes .btn-check.wkday')).map(cb=> !!cb.checked);
   }
-  var card = createCustomerCard(newIndex, {
-    name:'', number:'', order:'', persons: personsTemplate, selectedDays: selectedDays,
-    storeValues: (document.getElementById('storeValues').checked && document.getElementById('storeNames').checked),
-    values: []
-  });
+  const card = createCustomerCard(newIndex, { name:'', number:'', order:'', persons: personsTemplate, selectedDays: selectedDays, values: [] });
   customersContainer.appendChild(card);
   saveAllToCookies();
 }
 function saveAllAction(btn){
   saveAllToCookies();
-  if (btn) { var t = btn.textContent; btn.textContent = 'Gespeichert ✓'; setTimeout(function(){ btn.textContent = t; }, 1200); }
+  if (btn){
+    const t = btn.textContent;
+    btn.textContent = 'Gespeichert ✓';
+    setTimeout(()=> btn.textContent = t, 1200);
+  }
 }
 function openReportAction(){ runReport(); }
 
 document.getElementById('addCustomer').addEventListener('click', addCustomerAction);
-document.getElementById('saveAll').addEventListener('click', function(){ saveAllAction(document.getElementById('saveAll')); });
+document.getElementById('saveAll').addEventListener('click', ()=> saveAllAction(document.getElementById('saveAll')));
 document.getElementById('makeAllReport').addEventListener('click', openReportAction);
 document.getElementById('addCustomerBottom').addEventListener('click', addCustomerAction);
-document.getElementById('saveAllBottom').addEventListener('click', function(){ saveAllAction(document.getElementById('saveAllBottom')); });
+document.getElementById('saveAllBottom').addEventListener('click', ()=> saveAllAction(document.getElementById('saveAllBottom')));
 document.getElementById('makeAllReportBottom').addEventListener('click', openReportAction);
 
-/* Delegation in Karten */
+document.getElementById('prevWeek').addEventListener('click', ()=> { currentWeekDate = addDays(currentWeekDate, -7); currentWeekKey = getWeekKey(currentWeekDate); updateWeekDisplay(); loadWeek(currentWeekKey); });
+document.getElementById('nextWeek').addEventListener('click', ()=> { currentWeekDate = addDays(currentWeekDate, 7); currentWeekKey = getWeekKey(currentWeekDate); updateWeekDisplay(); loadWeek(currentWeekKey); });
+
+/* Delegation in customer container (including new copy-to-current action) */
 customersContainer.addEventListener('click', function(e){
-  var action = null, target = e.target;
-  while (target && target !== customersContainer) {
-    if (target.dataset && target.dataset.action) { action = target.dataset.action; break; }
+  let action=null, target=e.target;
+  while (target && target !== customersContainer){
+    if (target.dataset && target.dataset.action){ action = target.dataset.action; break; }
     target = target.parentElement;
   }
   if (!action) return;
-  var card = (target && target.closest) ? target.closest('.customer-card') : null;
+  const card = target.closest('.customer-card');
   if (!card) return;
-
-  if (action === 'remove-customer') {
+  if (action === 'remove-customer'){
     card.remove();
-    customersContainer.querySelectorAll('.customer-card').forEach(function(c, idx){
-      c.dataset.customerIndex = idx+1;
-      var no = c.querySelector('.cust-number'); if (no) no.textContent = '#' + (idx+1);
-    });
+    customersContainer.querySelectorAll('.customer-card').forEach((c,idx)=>{ c.dataset.customerIndex = idx+1; const no = c.querySelector('.cust-number'); if (no) no.textContent = '#' + (idx+1); });
     saveAllToCookies();
   }
-  if (action === 'addPerson') {
-    var count = card.querySelectorAll('.personenContainer .person').length;
+  if (action === 'addPerson'){
+    const count = card.querySelectorAll('.personenContainer .person').length;
     addPersonToCard(card, count+1, '');
     saveAllToCookies();
   }
-  if (action === 'removePerson') {
-    var p = target.closest('.person'); if (p) p.remove();
-    renumberPersons(card);
-    saveAllToCookies();
+  if (action === 'removePerson'){
+    const p = target.closest('.person'); if (p) p.remove(); renumberPersons(card); saveAllToCookies();
   }
+  if (action === 'copy-interim'){ copyInterimReport(card); }
+  if (action === 'multiweek-report'){ generateCustomerMultiWeekReport(card); }
+  if (action === 'copy-to-current'){ copyCustomerToRealCurrentWeek(card); }
+});
 
-  /* === Zwischenreport: Button-Handler === */
-  if (action === 'copy-interim') {
-    copyInterimReport(card);
-  }
-});
-customersContainer.addEventListener('input', function(e){
-  if (e.target && e.target.closest('.customer-card')) { saveAllToCookies(); }
-});
+customersContainer.addEventListener('input', function(e){ if (e.target && e.target.closest('.customer-card')) saveAllToCookies(); });
 document.getElementById('storeValues').addEventListener('change', saveAllToCookies);
 document.getElementById('storeNames').addEventListener('change', saveAllToCookies);
 document.getElementById('storeCustomer').addEventListener('change', saveAllToCookies);
 
-/* ===== Report ===== */
+/* Report builder (current-week only) */
 function runReport(){
-  var modalEl = document.getElementById('reportModal');
-  var modal = new bootstrap.Modal(modalEl);
-
+  // Reset UI
   document.getElementById('combinedReportContent').innerHTML = '';
   document.getElementById('personsRollupTable').innerHTML = '';
   document.getElementById('combinedReportText').textContent = '';
@@ -519,316 +449,384 @@ function runReport(){
   document.getElementById('allFehlerQuoteGesamt').textContent = '0.00 %';
   document.getElementById('personsRollupSection').style.display = '';
   document.getElementById('rollupHr').style.display = '';
-  var alertEl = document.getElementById('copyAlert'); if (alertEl) { alertEl.classList.add('d-none'); }
+  document.getElementById('pGesamt').style.display = '';
+  document.getElementById('pFehler').style.display = '';
+  document.getElementById('pQuote').style.display = '';
 
-  var iso = getISOWeek(new Date());
-  var kwStr = 'Kalenderwoche: KW ' + iso.week + '/' + iso.year;
-  var kwEl = document.getElementById('globalKWDisplay'); if (kwEl) kwEl.textContent = kwStr;
+  const iso = getISOWeek(currentWeekDate);
+  const kwStr = 'Kalenderwoche: KW ' + iso.week + '/' + iso.year;
+  const kwEl = document.getElementById('globalKWDisplay'); if (kwEl) kwEl.textContent = kwStr;
   document.title = 'Wochen Kurzbericht – KW ' + iso.week + '/' + iso.year;
 
-  var allGesamt = 0, allFehler = 0;
-  var combinedHTML = '', combinedText = '', personsRollup = {};
+  // Struktur: customersMap[key] = { name, number, order, personsTotal: { name:{pruef,fehler} } }
+  const customersMap = {};
+  let allGesamt = 0, allFehler = 0;
+  const personsRollup = {};
 
-  var cards = document.querySelectorAll('#customersContainer .customer-card');
-  if (!cards.length) { alert('Bitte mindestens einen Kunden anlegen.'); return; }
-
-  for (var c=0; c<cards.length; c++) {
-    var card = cards[c];
-    var kundenname = escapeHTML(((card.querySelector('.kundenName')||{value:''}).value || '').trim() || '-');
-    var kundennr = escapeHTML(((card.querySelector('.kundenNummer')||{value:''}).value || '').trim() || '-');
-    var auftrag = escapeHTML(((card.querySelector('.auftragNummer')||{value:''}).value || '').trim() || '-');
-
-    var checkedLabels = [];
-    card.querySelectorAll('.btn-check.wkday:checked').forEach(function(cb){
-      var lbl = cb.nextElementSibling ? cb.nextElementSibling.textContent : '';
-      if (lbl) checkedLabels.push(lbl);
-    });
-    var checkedDaysText = escapeHTML(checkedLabels.join(', '));
-
-    var gesamtSum = 0, fehlerSum = 0;
-    var personsRows = '', personsText = '';
-
-    var personBlocks = card.querySelectorAll('.personenContainer .person');
-    if (!personBlocks.length) { alert('Bitte beim Kunden #' + (c+1) + ' mindestens eine Person hinzufügen.'); return; }
-
-    for (var i=0; i<personBlocks.length; i++) {
-      var block = personBlocks[i];
-      var nameRaw = (block.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (i+1));
-      var name = escapeHTML(nameRaw);
-      var gesamtInput = block.querySelector('.gesamt');
-      var fehlerInput = block.querySelector('.fehler');
-
-      normalizeIntegerInput(gesamtInput);
-      normalizeIntegerInput(fehlerInput);
-
-      var gesamt = parseInt((gesamtInput||{value:''}).value, 10);
-      var fehler = parseInt((fehlerInput||{value:''}).value, 10);
-
-      if (!isFinite(gesamt) || !isFinite(fehler)) { alert('Bitte beim Kunden #' + (c+1) + ' alle Pflichtfelder ausfüllen.'); return; }
-      if (fehler > gesamt) { alert('Wert bei ' + nameRaw + ' (Kunde #' + (c+1) + '): "Nicht bestanden" darf nicht größer als "Prüfungen" sein!'); return; }
-
-      var q = gesamt > 0 ? (fehler / gesamt) * 100 : 0;
-      personsRows += '<tr><td>'+name+'</td><td>'+gesamt+'</td><td>'+fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
-      personsText += nameRaw + ': Prüfungen: ' + gesamt + ', Nicht bestanden: ' + fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
-
-      gesamtSum += gesamt; fehlerSum += fehler;
-      if (!personsRollup[nameRaw]) personsRollup[nameRaw] = { pruef: 0, fehler: 0 };
-      personsRollup[nameRaw].pruef += gesamt;
-      personsRollup[nameRaw].fehler += fehler;
-    }
-
-    var qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
-    var collapseId = 'custCollapse_' + (c+1);
-    combinedHTML += ''
-      + '<div class="card mb-3 report-card avoid-break">'
-      + '  <div class="print-block">'
-      + '    <div class="card-header">'
-      + '      <a class="text-decoration-none d-block" data-bs-toggle="collapse" href="#'+collapseId+'" role="button" aria-expanded="true" aria-controls="'+collapseId+'">'
-      + '        <strong>Kunde #'+(c+1) + (kundenname !== '-' ? (': ' + kundenname) : '') + '</strong>'
-      + '      </a>'
-      + '    </div>'
-      + '    <div id="'+collapseId+'" class="collapse show">'
-      + '      <div class="card-body">'
-      + '        <div class="row mb-2">'
-      + '          <div class="col-12 col-md-6"><strong>Kundennummer:</strong> ' + kundennr + '</div>'
-      + '          <div class="col-12 col-md-6"><strong>Auftragsnummer:</strong> ' + auftrag + '</div>'
-      + '          <div class="col-12"><strong>Anwesenheitstage:</strong> ' + (checkedDaysText || '-') + '</div>'
-      + '        </div>'
-      + '        <div class="table-responsive">'
-      + '          <table class="table table-sm table-bordered mb-2 report-table avoid-break">'
-      + '            <thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead>'
-      + '            <tbody>'+personsRows+'</tbody>'
-      + '            <tfoot><tr><th>Summe</th><th>'+gesamtSum+'</th><th>'+fehlerSum+'</th><th>'+qGes.toFixed(2)+' %</th></tr></tfoot>'
-      + '          </table>'
-      + '        </div>'
-      + '      </div>'
-      + '    </div>'
-      + '  </div>'
-      + '</div>';
-
-    combinedText += 'Kunde #' + (c+1) + (kundenname !== '-' ? (': ' + kundenname) : '') + '\n'
-      + 'Kundennummer: ' + kundennr + '\n'
-      + 'Auftragsnummer: ' + auftrag + '\n'
-      + 'Anwesenheitstage: ' + (checkedDaysText || '-') + '\n'
-      + personsText
-      + 'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %\n\n';
-
-    allGesamt += gesamtSum; allFehler += fehlerSum;
+  function ensureCustomer(key, name, number, order){
+    if (!customersMap[key]) customersMap[key] = { name: name || '-', number: number || '-', order: order || '-', personsTotal: {} };
+    return customersMap[key];
+  }
+  function addPersonToCustomer(custObj, pname, g, f){
+    if (!custObj.personsTotal[pname]) custObj.personsTotal[pname] = { pruef:0, fehler:0 };
+    custObj.personsTotal[pname].pruef += g;
+    custObj.personsTotal[pname].fehler += f;
   }
 
-  document.getElementById('combinedReportContent').innerHTML = combinedHTML;
-
-  var isSingle = (cards.length === 1);
-  var rollupSection = document.getElementById('personsRollupSection');
-  var rollupHr = document.getElementById('rollupHr');
-
-  var personsRollupText = '';
-  var personsRollupHTML = '';
-  if (isSingle) {
-    rollupSection.style.display = 'none';
-    rollupHr.style.display = 'none';
-  } else {
-    var rollupTableBody = document.getElementById('personsRollupTable');
-    rollupTableBody.innerHTML = '';
-    var tempRows = '';
-    Object.keys(personsRollup).sort(function(a,b){ return a.localeCompare(b, 'de'); }).forEach(function(nameKey){
-      var sums = personsRollup[nameKey];
-      var q = sums.pruef > 0 ? (sums.fehler / sums.pruef) * 100 : 0;
-      var rowHTML = '<tr><td>'+escapeHTML(nameKey)+'</td><td>'+sums.pruef+'</td><td>'+sums.fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
-      rollupTableBody.insertAdjacentHTML('beforeend', rowHTML);
-      tempRows += rowHTML;
-      personsRollupText += nameKey + ': Prüfungen: ' + sums.pruef + ', Nicht bestanden: ' + sums.fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
+  // 1) Aktuelle UI-Karten (aktuelle Woche)
+  const uiCards = document.querySelectorAll('#customersContainer .customer-card');
+  uiCards.forEach((card) => {
+    const name = (card.querySelector('.kundenName')||{value:''}).value.trim() || '-';
+    const number = (card.querySelector('.kundenNummer')||{value:''}).value.trim() || '-';
+    const order = (card.querySelector('.auftragNummer')||{value:''}).value.trim() || '-';
+    const key = [name, number, order].join('||');
+    const custObj = ensureCustomer(key, name, number, order);
+    const personBlocks = card.querySelectorAll('.personenContainer .person');
+    personBlocks.forEach((block,i)=>{
+      const pname = (block.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (i+1));
+      const g = parseInt((block.querySelector('.gesamt')||{value:''}).value,10) || 0;
+      const f = parseInt((block.querySelector('.fehler')||{value:''}).value,10) || 0;
+      addPersonToCustomer(custObj, pname, g, f);
+      allGesamt += g; allFehler += f;
+      if (!personsRollup[pname]) personsRollup[pname] = { pruef:0, fehler:0 };
+      personsRollup[pname].pruef += g; personsRollup[pname].fehler += f;
     });
-    personsRollupHTML = ''
-      + '<div class="rollup-block">'
-      + '  <h6 class="mb-2" style="break-after: avoid-page; page-break-after: avoid;">Gesamtüberblick Personen (kundenübergreifend)</h6>'
-      + '  <div class="table-responsive">'
-      + '    <table class="table table-sm table-bordered mb-2 report-table avoid-break">'
-      + '      <thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead>'
-      + '      <tbody>'+tempRows+'</tbody>'
-      + '    </table>'
-      + '  </div>'
-      + '</div>';
-  }
+  });
 
-  var allQuote = allGesamt > 0 ? (allFehler / allGesamt) * 100 : 0;
+  // Build combined HTML grouped by Kunde
+  let combinedHTML = '';
+  let combinedText = '';
+  let custIndex = 0;
+  Object.keys(customersMap).sort().forEach(key => {
+    custIndex++;
+    const cust = customersMap[key];
+    let personsRows = '';
+    let personsText = '';
+    let gesamtSum = 0, fehlerSum = 0;
+    Object.keys(cust.personsTotal).sort((a,b)=> a.localeCompare(b,'de')).forEach(pn => {
+      const p = cust.personsTotal[pn];
+      const q = p.pruef > 0 ? (p.fehler / p.pruef) * 100 : 0;
+      personsRows += '<tr><td>'+escapeHTML(pn)+'</td><td>'+p.pruef+'</td><td>'+p.fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
+      personsText += pn + ': Prüfungen: ' + p.pruef + ', Nicht bestanden: ' + p.fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
+      gesamtSum += p.pruef; fehlerSum += p.fehler;
+    });
+
+    const qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
+    const collapseId = 'custCollapse_' + custIndex;
+    combinedHTML += '<div class="card mb-3 report-card avoid-break"><div class="print-block"><div class="card-header"><a class="text-decoration-none d-block" data-bs-toggle="collapse" href="#'+collapseId+'" role="button" aria-expanded="true" aria-controls="'+collapseId+'"><strong>Kunde #'+custIndex+ (cust.name !== '-' ? (': ' + escapeHTML(cust.name)) : '') + '</strong></a></div><div id="'+collapseId+'" class="collapse show"><div class="card-body"><div class="row mb-2"><div class="col-12 col-md-4"><strong>Kundennummer:</strong> '+ escapeHTML(cust.number || '-') +'</div><div class="col-12 col-md-4"><strong>Auftragsnummer:</strong> '+ escapeHTML(cust.order || '-') +'</div><div class="col-12 col-md-4"><strong>Anmerkung:</strong> -</div></div><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>'+personsRows+'</tbody><tfoot><tr><th>Summe</th><th>'+gesamtSum+'</th><th>'+fehlerSum+'</th><th>'+qGes.toFixed(2)+' %</th></tr></tfoot></table></div></div></div></div></div>';
+
+    combinedText += 'Kunde: ' + (cust.name !== '-' ? cust.name : '-') + '\n' + 'Kundennummer: ' + (cust.number || '-') + '\n' + 'Auftragsnummer: ' + (cust.order || '-') + '\n' + personsText + 'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %\n\n';
+  });
+
+  const allQuote = allGesamt > 0 ? (allFehler / allGesamt) * 100 : 0;
   document.getElementById('allGesamtSumme').textContent = allGesamt;
   document.getElementById('allFehlerSumme').textContent = allFehler;
   document.getElementById('allFehlerQuoteGesamt').textContent = allQuote.toFixed(2) + ' %';
 
-  var pGesamt = document.getElementById('pGesamt');
-  var pFehler = document.getElementById('pFehler');
-  var pQuote  = document.getElementById('pQuote');
-  if (isSingle) { pGesamt.style.display = 'none'; pFehler.style.display = 'none'; pQuote.style.display  = 'none'; }
-  else { pGesamt.style.display = ''; pFehler.style.display = ''; pQuote.style.display  = ''; }
+  const isSingle = Object.keys(customersMap).length === 1;
+  if (isSingle){ document.getElementById('personsRollupSection').style.display = 'none'; document.getElementById('rollupHr').style.display = 'none'; }
 
-  var header = 'REPORT\n' + kwStr + '\n\n';
-  var combinedCopy = header + combinedText;
-  if (!isSingle && personsRollupText) combinedCopy += 'Gesamtüberblick Personen (kundenübergreifend)\n' + personsRollupText + '\n';
+  let header = 'REPORT\n' + kwStr + '\n\n';
+  let combinedCopy = header + combinedText;
+
+  // persons rollup (kundenübergreifend) -> populate existing section (no duplicate rendering)
+  if (!isSingle && Object.keys(personsRollup).length){
+    let tempRows = '';
+    let personsRollupText = '';
+    Object.keys(personsRollup).sort((a,b)=> a.localeCompare(b,'de')).forEach(nameKey=>{
+      const s = personsRollup[nameKey];
+      const q = s.pruef > 0 ? (s.fehler / s.pruef) * 100 : 0;
+      const row = '<tr><td>'+escapeHTML(nameKey)+'</td><td>'+s.pruef+'</td><td>'+s.fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
+      tempRows += row;
+      personsRollupText += nameKey + ': Prüfungen: ' + s.pruef + ', Nicht bestanden: ' + s.fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
+    });
+    document.getElementById('personsRollupTable').innerHTML = tempRows;
+    combinedCopy += 'Gesamtüberblick Personen (kundenübergreifend)\n' + personsRollupText + '\n';
+  } else {
+    document.getElementById('personsRollupTable').innerHTML = '';
+  }
+
   if (!isSingle) combinedCopy += 'GESAMT (alle Kunden): Prüfungen: ' + allGesamt + ', Nicht bestanden: ' + allFehler + ', Fehlerquote: ' + allQuote.toFixed(2) + ' %';
+
+  document.getElementById('combinedReportContent').innerHTML = combinedHTML;
   document.getElementById('combinedReportText').textContent = combinedCopy;
 
-  // PrintArea füllen
-  var printHTML = ''
-    + '<div>'
-    + '  <h2 class="h4">Report</h2>'
-    + '  <div class="mb-2"><strong>'+ kwStr +'</strong></div>'
-    +    document.getElementById('combinedReportContent').innerHTML
-    +    (!isSingle ? ('<hr>' + personsRollupHTML) : '')
-    + '  <hr>'
-    + '  <div>'
-    + '    <p><strong>GESAMT Prüfungen (alle Kunden):</strong> ' + (isSingle ? '' : allGesamt) + '</p>'
-    + '    <p><strong>GESAMT Nicht bestanden (alle Kunden):</strong> ' + (isSingle ? '' : allFehler) + '</p>'
-    + '    <p><strong>GESAMT Fehlerquote (alle Kunden):</strong> ' + (isSingle ? '' : (allQuote.toFixed(2) + ' %')) + '</p>'
-    + '  </div>'
-    + '</div>';
-  document.getElementById('printArea').innerHTML = printHTML;
+  // Prepare printArea: include combinedHTML + persons rollup + totals
+  const printParts = [];
+  printParts.push('<div><h2 class="h4">Report</h2><div class="mb-2"><strong>' + kwStr + '</strong></div>');
+  printParts.push(document.getElementById('combinedReportContent').innerHTML);
+  if (!isSingle && document.getElementById('personsRollupTable').innerHTML.trim()){
+    printParts.push('<hr><div class="rollup-block"><h6 class="mb-2">Gesamtüberblick Personen (kundenübergreifend)</h6><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>' + document.getElementById('personsRollupTable').innerHTML + '</tbody></table></div></div>');
+  }
+  printParts.push('<hr><div><p><strong>GESAMT Prüfungen (alle Kunden):</strong> ' + (isSingle ? '' : allGesamt) + '</p><p><strong>GESAMT Nicht bestanden (alle Kunden):</strong> ' + (isSingle ? '' : allFehler) + '</p><p><strong>GESAMT Fehlerquote (alle Kunden):</strong> ' + (isSingle ? '' : (allQuote.toFixed(2) + ' %')) + '</p></div></div>');
+  document.getElementById('printArea').innerHTML = printParts.join('');
 
-  var modal = new bootstrap.Modal(document.getElementById('reportModal'));
+  const modal = new bootstrap.Modal(document.getElementById('reportModal'));
   modal.show();
 }
 
-// Kopieren (Gesamtreport)
-function copyReport(){
-  var text = (document.getElementById('combinedReportText')||{textContent:''}).textContent || '';
-  if (!text.trim()) { alert('Bitte zuerst den Report erstellen.'); return; }
-  function showAlert(){
-    var info = document.getElementById('copyAllSuccess'); if (info) { info.style.display = 'inline'; setTimeout(function(){ info.style.display = 'none'; }, 2000); }
-    var alertEl = document.getElementById('copyAlert'); if (alertEl) { alertEl.classList.remove('d-none'); setTimeout(function(){ alertEl.classList.add('d-none'); }, 3000); }
-  }
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function(){ showAlert(); }, function(){ fallbackCopyAll(text, showAlert); });
-    } else { fallbackCopyAll(text, showAlert); }
-  } catch(e) { fallbackCopyAll(text, showAlert); }
-}
-function fallbackCopyAll(text, cb) {
-  var ta = document.createElement('textarea');
-  ta.value = text; document.body.appendChild(ta); ta.select();
-  try { document.execCommand('copy'); } catch(e) {}
-  document.body.removeChild(ta);
-  if (typeof cb === 'function') cb();
-}
-document.getElementById('copyAllBtn').addEventListener('click', copyReport);
-document.getElementById('copyAllBtnBottom').addEventListener('click', copyReport);
+/* Copy / print helpers */
+function fallbackCopyAll(text, cb){ const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch(e) {} document.body.removeChild(ta); if (typeof cb === 'function') cb(); }
+function copyReport(){ const text = (document.getElementById('combinedReportText')||{textContent:''}).textContent || ''; if (!text.trim()){ alert('Bitte zuerst den Report erstellen.'); return; } function showAlert(){ const info = document.getElementById('copyAllSuccess'); if (info){ info.style.display='inline'; setTimeout(()=> info.style.display='none',2000); } const alertEl = document.getElementById('copyAlert'); if (alertEl){ alertEl.classList.remove('d-none'); setTimeout(()=> alertEl.classList.add('d-none'),3000); } } try { if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=> showAlert(), ()=> fallbackCopyAll(text, showAlert)); } else { fallbackCopyAll(text, showAlert); } } catch(e){ fallbackCopyAll(text, showAlert); } }
 
-// Drucken in neuem Fenster (verhindert Leerseiten)
-function printReport(){
-  var pa = document.getElementById('printArea');
-  if (!pa || !pa.innerHTML.trim()) { alert('Bitte zuerst den Report erstellen.'); return; }
-  var w = window.open('', '_blank');
-  var title = document.title || 'Report';
-  var printCss = '@page{ margin:10mm; }'
-    + 'body{ padding:6mm; }'
-    + '.table-sm td,.table-sm th{ padding:.18rem .36rem; }'
-    + '.report-card,.report-table,.report-table thead,.report-table tbody,.report-table tr,.report-table td,.report-table th,.print-block,.rollup-block{'
-    + '  break-inside: avoid; page-break-inside: avoid;'
-    + '}'
-    + 'h1,h2,h3,h4,h5,h6{ break-after: avoid-page; page-break-after: avoid; }';
-  w.document.open();
-  w.document.write('<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>'+title+'</title>'
-    + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">'
-    + '<style>'+printCss+'</style></head><body>'
-    + pa.innerHTML + '</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function(){ w.print(); setTimeout(function(){ w.close(); }, 300); }, 150);
-}
-document.getElementById('printBtn').addEventListener('click', printReport);
-document.getElementById('printBtnBottom').addEventListener('click', printReport);
+document.getElementById('copyAllBtn').addEventListener('click', copyReport); document.getElementById('copyAllBtnBottom').addEventListener('click', copyReport);
 
-/* === Zwischenreport: Builder & Kopieren pro Kunde === */
-function buildInterimReportForCard(card) {
-  // KW bestimmen
-  var iso = getISOWeek(new Date());
-  var kwStr = 'Kalenderwoche: KW ' + iso.week + '/' + iso.year;
+function printReport(){ const pa = document.getElementById('printArea'); if (!pa || !pa.innerHTML.trim()){ alert('Bitte zuerst den Report erstellen.'); return; } const w = window.open('', '_blank'); const title = document.title || 'Report'; const printCss = '@page{ margin:10mm; } body{ padding:6mm; } .table-sm td,.table-sm th{ padding:.18rem .36rem; } .report-card,.report-table,.report-table thead,.report-table tbody,.report-table tr,.report-table td,.report-table th,.print-block,.rollup-block{ break-inside: avoid; page-break-inside: avoid; } h1,h2,h3,h4,h5,h6{ break-after: avoid-page; page-break-after: avoid; }'; w.document.open(); w.document.write('<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>'+title+'</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"><style>'+printCss+'</style></head><body>' + pa.innerHTML + '</body></html>'); w.document.close(); w.focus(); setTimeout(()=>{ w.print(); setTimeout(()=> w.close(),300); },150); }
 
-  // Kundendaten
-  var kundennameRaw = ((card.querySelector('.kundenName')||{value:''}).value || '').trim() || '-';
-  var kundenname = kundennameRaw;
-  var kundennr = ((card.querySelector('.kundenNummer')||{value:''}).value || '').trim() || '-';
-  var auftrag = ((card.querySelector('.auftragNummer')||{value:''}).value || '').trim() || '-';
+document.getElementById('printBtn').addEventListener('click', printReport); document.getElementById('printBtnBottom').addEventListener('click', printReport);
 
-  // Anwesenheitstage
-  var checkedLabels = [];
-  card.querySelectorAll('.btn-check.wkday:checked').forEach(function(cb){
-    var lbl = cb.nextElementSibling ? cb.nextElementSibling.textContent : '';
-    if (lbl) checkedLabels.push(lbl);
-  });
-  var checkedDaysText = checkedLabels.join(', ') || '-';
-
-  // Personen & Summen
-  var personBlocks = card.querySelectorAll('.personenContainer .person');
-  if (!personBlocks.length) {
-    throw new Error('Bitte mindestens eine Person beim Kunden erfassen.');
-  }
-
-  var gesamtSum = 0, fehlerSum = 0;
-  var personsText = '';
-
-  for (var i=0; i<personBlocks.length; i++) {
-    var block = personBlocks[i];
-    var nameRaw = (block.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (i+1));
-    var gesamtInput = block.querySelector('.gesamt');
-    var fehlerInput = block.querySelector('.fehler');
-
+/* Interim report per customer (copy) */
+function buildInterimReportForCard(card){
+  const iso = getISOWeek(currentWeekDate);
+  const kwStr = 'Kalenderwoche: KW ' + iso.week + '/' + iso.year;
+  const kundennameRaw = ((card.querySelector('.kundenName')||{value:''}).value || '').trim() || '-';
+  const kundennr = ((card.querySelector('.kundenNummer')||{value:''}).value || '').trim() || '-';
+  const auftrag = ((card.querySelector('.auftragNummer')||{value:''}).value || '').trim() || '-';
+  const checkedLabels=[];
+  card.querySelectorAll('.btn-check.wkday:checked').forEach(cb=>{ const lbl = cb.nextElementSibling ? cb.nextElementSibling.textContent : ''; if (lbl) checkedLabels.push(lbl); });
+  const checkedDaysText = checkedLabels.length ? checkedLabels.join(', ') : '-';
+  const personBlocks = card.querySelectorAll('.personenContainer .person');
+  if (!personBlocks.length) throw new Error('Bitte mindestens eine Person beim Kunden erfassen.');
+  let gesamtSum=0, fehlerSum=0, personsText='';
+  for (let i=0;i<personBlocks.length;i++){
+    const block = personBlocks[i];
+    const nameRaw = (block.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (i+1));
+    const gesamtInput = block.querySelector('.gesamt');
+    const fehlerInput = block.querySelector('.fehler');
     normalizeIntegerInput(gesamtInput);
     normalizeIntegerInput(fehlerInput);
-
-    var gesamt = parseInt((gesamtInput||{value:''}).value, 10);
-    var fehler = parseInt((fehlerInput||{value:''}).value, 10);
-
-    if (!isFinite(gesamt) || !isFinite(fehler)) {
-      throw new Error('Bitte alle Pflichtfelder (Prüfungen/Nicht bestanden) ausfüllen.');
-    }
-    if (fehler > gesamt) {
-      throw new Error('Bei "' + nameRaw + '": "Nicht bestanden" darf nicht größer als "Prüfungen" sein.');
-    }
-
-    var q = gesamt > 0 ? (fehler / gesamt) * 100 : 0;
+    const gesamt = parseInt((gesamtInput||{value:''}).value,10);
+    const fehler = parseInt((fehlerInput||{value:''}).value,10);
+    if (!isFinite(gesamt) || !isFinite(fehler)) throw new Error('Bitte alle Pflichtfelder (Prüfungen/Nicht bestanden) ausfüllen.');
+    if (fehler > gesamt) throw new Error('Bei "'+nameRaw+'": "Nicht bestanden" darf nicht größer als "Prüfungen" sein.');
+    const q = gesamt > 0 ? (fehler / gesamt) * 100 : 0;
     personsText += nameRaw + ': Prüfungen: ' + gesamt + ', Nicht bestanden: ' + fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
     gesamtSum += gesamt; fehlerSum += fehler;
   }
-
-  var qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
-
-  // Text zusammenstellen (mit gewünschter Überschrift "Zwischenreport")
-  var txt =
-    'Zwischenreport\n'
-    + kwStr + '\n\n'
-    + 'Kunde: ' + kundenname + '\n'
-    + 'Kundennummer: ' + kundennr + '\n'
-    + 'Auftragsnummer: ' + auftrag + '\n'
-    + 'Anwesenheitstage: ' + checkedDaysText + '\n'
-    + personsText
-    + 'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %';
-
+  const qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
+  const txt = 'Zwischenreport\n' + kwStr + '\n\n' + 'Kunde: ' + kundennameRaw + '\n' + 'Kundennummer: ' + kundennr + '\n' + 'Auftragsnummer: ' + auftrag + '\n' + 'Anwesenheitstage: ' + checkedDaysText + '\n\n' + personsText + '\nSumme: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %';
   return txt;
 }
-function copyInterimReport(card) {
-  var successEl = card.querySelector('.interim-copy-success');
+function copyInterimReport(card){
+  const successEl = card.querySelector('.interim-copy-success');
   function showInlineSuccess(){
-    if (successEl) { successEl.classList.remove('d-none'); setTimeout(function(){ successEl.classList.add('d-none'); }, 2000); }
+    if (successEl){ successEl.classList.remove('d-none'); setTimeout(()=> successEl.classList.add('d-none'),2000); }
   }
   try {
-    var text = buildInterimReportForCard(card);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function(){ showInlineSuccess(); }, function(){
-        fallbackCopyAll(text, showInlineSuccess);
-      });
+    const text = buildInterimReportForCard(card);
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=> showInlineSuccess(), ()=> fallbackCopyAll(text, showInlineSuccess));
     } else {
       fallbackCopyAll(text, showInlineSuccess);
     }
-  } catch(err) {
+  } catch(err){
     alert(err.message || 'Zwischenreport konnte nicht erstellt werden.');
   }
 }
 
-/* ===== Start ===== */
-(function init(){
-  var payload = loadAllFromCookies();
-  buildUIFromData(payload);
-})();
+/* NEW: Copy customer into the REAL current week (today's week), auto-save (B) */
+function copyCustomerToRealCurrentWeek(sourceCard){
+  try {
+    const todayMonday = getMondayOfCurrentWeek(new Date());
+    const targetWeekKey = getWeekKey(todayMonday);
+    const targetWeekLabel = getWeekLabelFromKey(targetWeekKey);
+    const name = ((sourceCard.querySelector('.kundenName')||{value:''}).value || '').trim();
+    const number = ((sourceCard.querySelector('.kundenNummer')||{value:''}).value || '').trim();
+    const order = ((sourceCard.querySelector('.auftragNummer')||{value:''}).value || '').trim();
+    if (!name && !number && !order){ showToast('Leerer Kunde kann nicht kopiert werden.', 'danger'); return; }
+    const persons = []; const values = [];
+    sourceCard.querySelectorAll('.personenContainer .person').forEach((pb)=>{ const pname = (pb.querySelector('.name')||{value:''}).value.trim(); persons.push(pname || ''); values.push({gesamt:0, fehler:0}); });
+    let selectedDays = [true,true,true,true,false];
+    const srcBoxes = sourceCard.querySelectorAll('.dayCheckboxes .btn-check.wkday');
+    if (srcBoxes && srcBoxes.length === 5) selectedDays = Array.from(srcBoxes).map(cb => !!cb.checked);
+    const store = loadStore();
+    if (!store[targetWeekKey]) store[targetWeekKey] = { storeValues: false, storeNames: false, storeCustomer: true, customers: [] };
+    const exists = (store[targetWeekKey].customers || []).some(c => ( (c.name||'') === name && (c.number||'') === number && (c.order||'') === order ));
+    if (exists){ showToast('Kunde existiert bereits in ' + targetWeekLabel + '.', 'info'); return; }
+    const copyObj = { name: name, number: number, order: order, persons: persons, selectedDays: selectedDays, values: values };
+    if (!Array.isArray(store[targetWeekKey].customers)) store[targetWeekKey].customers = [];
+    store[targetWeekKey].customers.push(copyObj);
+    store[targetWeekKey].storeValues = document.getElementById('storeValues').checked;
+    store[targetWeekKey].storeNames = document.getElementById('storeNames').checked;
+    store[targetWeekKey].storeCustomer = document.getElementById('storeCustomer').checked || true;
+    saveStore(store);
+    showToast('Kunde in ' + targetWeekLabel + ' kopiert und gespeichert.', 'success');
+    const currentlyViewedWeekKey = currentWeekKey;
+    if (currentlyViewedWeekKey === targetWeekKey){
+      const idx = customersContainer.querySelectorAll('.customer-card').length + 1;
+      const card = createCustomerCard(idx, { name: copyObj.name, number: copyObj.number, order: copyObj.order, persons: copyObj.persons, selectedDays: copyObj.selectedDays, values: copyObj.values });
+      customersContainer.appendChild(card);
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Fehler beim Kopieren in die aktuelle KW.', 'danger');
+  }
+}
+
+/* NEW: Multi-week aggregation and per-customer report (with Kundennummer & Auftragsnummer + printable printArea) */
+function generateCustomerMultiWeekReport(card){
+  const name = ((card.querySelector('.kundenName')||{value:''}).value || '').trim();
+  const number = ((card.querySelector('.kundenNummer')||{value:''}).value || '').trim();
+  const order = ((card.querySelector('.auftragNummer')||{value:''}).value || '').trim();
+  if (!name || !number || !order){ alert('Bitte Kunde vollständig identifizieren: Kundenname, Kundennummer und Auftragsnummer müssen ausgefüllt sein (strenger Match).'); return; }
+
+  const store = loadStore();
+  const weekKeys = Object.keys(store).filter(k=> /^\d{4}-W\d{2}$/.test(k));
+  if (!weekKeys.includes(currentWeekKey)) weekKeys.push(currentWeekKey);
+  weekKeys.sort((a,b)=>{ const pa = parseWeekKey(a), pb = parseWeekKey(b); if (!pa || !pb) return a.localeCompare(b); if (pa.year !== pb.year) return pa.year - pb.year; return pa.week - pb.week; });
+
+  const weekDetails = []; let personAgg = {}; let totalPruef = 0, totalFehler = 0; let weeksFound = 0;
+
+  weekKeys.forEach(weekKey => {
+    let perWeek = { weekKey: weekKey, persons: {}, attendance: [] };
+    if (weekKey === currentWeekKey){
+      const cards = document.querySelectorAll('#customersContainer .customer-card');
+      cards.forEach(cardEl => {
+        const nm = (cardEl.querySelector('.kundenName')||{value:''}).value.trim();
+        const nr = (cardEl.querySelector('.kundenNummer')||{value:''}).value.trim();
+        const or = (cardEl.querySelector('.auftragNummer')||{value:''}).value.trim();
+        if (nm === name && nr === number && or === order){
+          weeksFound++;
+          const dayLabels = [];
+          cardEl.querySelectorAll('.btn-check.wkday:checked').forEach(cb=>{ const lbl = cb.nextElementSibling ? cb.nextElementSibling.textContent : ''; if (lbl) dayLabels.push(lbl); });
+          perWeek.attendance = dayLabels;
+          const personBlocks = cardEl.querySelectorAll('.personenContainer .person');
+          personBlocks.forEach((pb, idx)=>{ const pname = (pb.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (idx+1)); const g = parseInt((pb.querySelector('.gesamt')||{value:''}).value,10) || 0; const f = parseInt((pb.querySelector('.fehler')||{value:''}).value,10) || 0; perWeek.persons[pname] = perWeek.persons[pname] || { gesamt:0, fehler:0 }; perWeek.persons[pname].gesamt += g; perWeek.persons[pname].fehler += f; if (!personAgg[pname]) personAgg[pname] = { pruef:0, fehler:0 }; personAgg[pname].pruef += g; personAgg[pname].fehler += f; totalPruef += g; totalFehler += f; });
+        }
+      });
+    } else {
+      const payload = store[weekKey];
+      if (!payload || !Array.isArray(payload.customers)) return;
+      let foundInThisWeek = false;
+      payload.customers.forEach(c => {
+        if ((c.name || '') === name && (c.number || '') === number && (c.order || '') === order){
+          foundInThisWeek = true; weeksFound++;
+          if (Array.isArray(c.selectedDays) && c.selectedDays.length === 5){
+            const wk = parseWeekKey(weekKey);
+            if (wk){
+              const wkStart = isoWeekStart(wk.year, wk.week);
+              const dayLabels = [];
+              for (let i=0;i<5;i++){
+                if (c.selectedDays[i]){ const d = new Date(wkStart); d.setDate(wkStart.getDate() + i); const lbl = weekdayDE(d).charAt(0).toUpperCase() + weekdayDE(d).slice(1) + ' (' + formatDE(d) + ')'; dayLabels.push(lbl); }
+              }
+              perWeek.attendance = dayLabels;
+            }
+          }
+          const persons = Array.isArray(c.persons) ? c.persons : [];
+          const values = Array.isArray(c.values) ? c.values : persons.map(()=> ({gesamt:0, fehler:0}));
+          for (let i=0;i<Math.max(persons.length, values.length); i++){
+            const pname = (persons[i] || ('Person ' + (i+1))).trim() || ('Person ' + (i+1));
+            const val = values[i] || { gesamt: 0, fehler: 0 };
+            const g = (typeof val.gesamt === 'number' && isFinite(val.gesamt)) ? val.gesamt : 0;
+            const f = (typeof val.fehler === 'number' && isFinite(val.fehler)) ? val.fehler : 0;
+            perWeek.persons[pname] = perWeek.persons[pname] || { gesamt:0, fehler:0 };
+            perWeek.persons[pname].gesamt += g; perWeek.persons[pname].fehler += f;
+            if (!personAgg[pname]) personAgg[pname] = { pruef:0, fehler:0 };
+            personAgg[pname].pruef += g; personAgg[pname].fehler += f;
+            totalPruef += g; totalFehler += f;
+          }
+        }
+      });
+      if (!foundInThisWeek) return;
+    }
+    if (Object.keys(perWeek.persons).length || (perWeek.attendance && perWeek.attendance.length)) weekDetails.push(perWeek);
+  });
+
+  if (weeksFound === 0){ alert('Für diesen Kunden wurden keine Einträge in gespeicherten Wochen (inkl. aktueller) gefunden.'); return; }
+
+  // build per-week blocks + aggregated block
+  let weekBlocks = '';
+  weekDetails.forEach(wd => {
+    const wl = getWeekLabelFromKey(wd.weekKey);
+    let attendanceHtml = '';
+    if (wd.attendance && wd.attendance.length){
+      attendanceHtml = '<p><strong>Anwesenheitstage:</strong> ' + wd.attendance.join(', ') + '</p>';
+    }
+    let rows = '';
+    Object.keys(wd.persons).sort((a,b)=> a.localeCompare(b,'de')).forEach(pn => {
+      const p = wd.persons[pn];
+      const q = p.gesamt > 0 ? (p.fehler / p.gesamt) * 100 : 0;
+      rows += '<tr><td>'+escapeHTML(pn)+'</td><td>'+p.gesamt+'</td><td>'+p.fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
+    });
+    weekBlocks += '<div class="mb-2"><h6 class="mt-3">' + escapeHTML(wl) + '</h6>' + attendanceHtml + '<div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+  });
+
+  let aggRows = '';
+  Object.keys(personAgg).sort((a,b)=> a.localeCompare(b,'de')).forEach(k => {
+    const s = personAgg[k];
+    const q = s.pruef > 0 ? (s.fehler / s.pruef) * 100 : 0;
+    aggRows += '<tr><td>'+escapeHTML(k)+'</td><td>'+s.pruef+'</td><td>'+s.fehler+'</td><td>'+q.toFixed(2)+' %</td></tr>';
+  });
+
+  const aggBlock = '<h5 class="avoid-break">Gesamtergebnis (über alle betrachteten Wochen)</h5><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>' + aggRows + '</tbody><tfoot><tr><th>Summe</th><th>' + totalPruef + '</th><th>' + totalFehler + '</th><th>' + (totalPruef>0 ? ((totalFehler/totalPruef)*100).toFixed(2) + ' %' : '0.00 %') + '</th></tr></tfoot></table></div>';
+
+  // include Kundendaten in header (requested)
+  const header = '<h4>Kunden-Zusammenfassung: <br>' + escapeHTML(name) + '</h4>' +
+                 '<p><strong>Kundennummer:</strong> ' + escapeHTML(number) + ' &nbsp;&nbsp; <strong>Auftragsnummer:</strong> ' + escapeHTML(order) + '</p>' +
+                 '<p>Betrachtete Wochen: ' + weekDetails.length + '</p>';
+
+  document.getElementById('combinedReportContent').innerHTML = header + weekBlocks + '<hr>' + aggBlock;
+
+  // prepare plaintext for clipboard (include attendance info)
+  let textReport = 'Kunden-Zusammenfassung\nKunde: ' + name + '\nKundennummer: ' + number + '\nAuftragsnummer: ' + order + '\nWochen betrachtet: ' + weekDetails.length + '\n\n';
+  weekDetails.forEach(wd => {
+    textReport += getWeekLabelFromKey(wd.weekKey) + '\n';
+    if (wd.attendance && wd.attendance.length){
+      textReport += 'Anwesenheitstage: ' + wd.attendance.join(', ') + '\n';
+    }
+    Object.keys(wd.persons).forEach(pn => {
+      const p = wd.persons[pn];
+      const q = p.gesamt > 0 ? (p.fehler / p.gesamt) * 100 : 0;
+      textReport += pn + ': Prüfungen: ' + p.gesamt + ', Nicht bestanden: ' + p.fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
+    });
+    textReport += '\n';
+  });
+  textReport += 'GESAMT\n';
+  Object.keys(personAgg).sort((a,b)=> a.localeCompare(b,'de')).forEach(k => {
+    const s = personAgg[k];
+    const q = s.pruef > 0 ? (s.fehler / s.pruef) * 100 : 0;
+    textReport += k + ': Prüfungen: ' + s.pruef + ', Nicht bestanden: ' + s.fehler + ', Fehlerquote: ' + q.toFixed(2) + ' %\n';
+  });
+
+  document.getElementById('combinedReportText').textContent = textReport;
+  document.getElementById('globalKWDisplay').textContent = 'Kunden-Zusammenfassung über mehrere Wochen';
+
+  // hide global totals (irrelevant for single-customer multiweek report)
+  document.getElementById('personsRollupSection').style.display = 'none';
+  document.getElementById('rollupHr').style.display = 'none';
+  document.getElementById('pGesamt').style.display = 'none';
+  document.getElementById('pFehler').style.display = 'none';
+  document.getElementById('pQuote').style.display = 'none';
+
+  // prepare printable content for this multi-week report and put into printArea so printReport() works
+  const printHtml = '<div>' + document.getElementById('combinedReportContent').innerHTML + '</div>';
+  document.getElementById('printArea').innerHTML = printHtml;
+
+  const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+  modal.show();
+}
+
+/* Load / init week */
+function loadWeek(weekKey){
+  currentWeekKey = weekKey;
+  updateWeekDisplay();
+  const payload = loadAllFromCookiesForWeek(weekKey);
+  if (!payload){
+    customersContainer.innerHTML = '';
+    const store = loadStore();
+    const defaults = store[weekKey] || null;
+    if (defaults && typeof defaults === 'object'){
+      document.getElementById('storeValues').checked = !!defaults.storeValues;
+      document.getElementById('storeNames').checked = !!defaults.storeNames;
+      document.getElementById('storeCustomer').checked = !!defaults.storeCustomer;
+    }
+  } else {
+    buildUIFromData(payload, weekKey);
+  }
+}
+
+/* Start */
+(function init(){ realWeekDate = getMondayOfCurrentWeek(new Date()); realWeekKey = getWeekKey(realWeekDate); updateWeekDisplay(); loadWeek(currentWeekKey); })();
 </script>
 
 </body>
