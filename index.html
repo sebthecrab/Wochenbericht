@@ -233,8 +233,8 @@ function createCustomerCard(index, customerData = {}){
       <div class="d-flex gap-2 align-items-center">
         <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-to-current">In aktuelle KW kopieren</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" data-action="multiweek-report">Multi-Wochen Report</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischenreport kopieren</button>
-        <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-customer">Kunden entfernen</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischen Report</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-customer"><i class="bi bi-trash"></i></button>
       </div>
     </div>
     <div class="card-body">
@@ -258,7 +258,7 @@ function createCustomerCard(index, customerData = {}){
       </div>
       <div class="personenContainer"></div>
       <div class="d-grid gap-2 mb-2">
-        <button type="button" class="btn btn-secondary" data-action="addPerson">Weitere Person hinzufügen</button>
+        <button type="button" class="btn btn-secondary" data-action="addPerson"><i class="bi bi-person-fill-add"></i></button>
       </div>
       <small class="text-success d-none interim-copy-success">Zwischenreport in die Zwischenablage kopiert.</small>
     </div>`;
@@ -293,7 +293,7 @@ function addPersonToCard(card, index, nameValue, valueObj){
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h5 class="mb-0">Person ${index}</h5>
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-outline-danger" data-action="removePerson">Entfernen</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-action="removePerson"><i class="bi bi-person-x"></i></button>
       </div>
     </div>
     <div class="mb-3">
