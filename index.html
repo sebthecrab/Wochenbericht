@@ -232,9 +232,9 @@ function createCustomerCard(index, customerData = {}){
     <div class="card-header d-flex justify-content-between align-items-center">
       <div><strong>Kunde</strong> <span class="cust-number">#${index}</span></div>
       <div class="d-flex gap-2 align-items-center">
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-to-current">In aktuelle KW kopieren</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="multiweek-report">Multi-Wochen Report</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischen Report</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-to-current">In akt. KW <i class="bi bi-clipboard-plus-fill"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="multiweek-report">Multi-Wochen <i class="bi bi-card-text"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="copy-interim">Zwischen <i class="bi bi-card-text"></i></button>
         <button type="button" class="btn btn-sm btn-danger" data-action="remove-customer"><i class="bi bi-trash"></i></button>
       </div>
     </div>
@@ -294,7 +294,7 @@ function addPersonToCard(card, index, nameValue, valueObj){
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h5 class="mb-0">Person ${index}</h5>
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-outline-danger" data-action="removePerson"><i class="bi bi-person-x"></i></button>
+        <button type="button" class="btn btn-sm btn-danger" data-action="removePerson"><i class="bi bi-person-x"></i></button>
       </div>
     </div>
     <div class="mb-3">
