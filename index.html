@@ -458,19 +458,27 @@ function runReport(){
   const kwEl = document.getElementById('globalKWDisplay'); if (kwEl) kwEl.textContent = kwStr;
   document.title = 'Wochen Kurzbericht – KW ' + iso.week + '/' + iso.year;
 
-  // Struktur: customersMap[key] = { name, number, order, personsTotal: { name:{pruef,fehler} } }
+  // Struktur: customersMap[key] = { name, number, order, personsTotal: { name:{pruef,fehler} }, attendance:Set<string> }
   const customersMap = {};
   let allGesamt = 0, allFehler = 0;
   const personsRollup = {};
 
   function ensureCustomer(key, name, number, order){
-    if (!customersMap[key]) customersMap[key] = { name: name || '-', number: number || '-', order: order || '-', personsTotal: {} };
+    if (!customersMap[key]) customersMap[key] = { name: name || '-', number: number || '-', order: order || '-', personsTotal: {}, attendance: new Set() };
     return customersMap[key];
   }
   function addPersonToCustomer(custObj, pname, g, f){
     if (!custObj.personsTotal[pname]) custObj.personsTotal[pname] = { pruef:0, fehler:0 };
     custObj.personsTotal[pname].pruef += g;
     custObj.personsTotal[pname].fehler += f;
+  }
+  function getCheckedLabelsForCard(card){
+    const labels = [];
+    card.querySelectorAll('.btn-check.wkday:checked').forEach(cb=>{
+      const lbl = cb.nextElementSibling ? cb.nextElementSibling.textContent : '';
+      if (lbl) labels.push(lbl);
+    });
+    return labels;
   }
 
   // 1) Aktuelle UI-Karten (aktuelle Woche)
@@ -481,6 +489,11 @@ function runReport(){
     const order = (card.querySelector('.auftragNummer')||{value:''}).value.trim() || '-';
     const key = [name, number, order].join('||');
     const custObj = ensureCustomer(key, name, number, order);
+
+    // NEU: Anwesenheitstage sammeln
+    const dayLabels = getCheckedLabelsForCard(card);
+    dayLabels.forEach(l=> custObj.attendance.add(l));
+
     const personBlocks = card.querySelectorAll('.personenContainer .person');
     personBlocks.forEach((block,i)=>{
       const pname = (block.querySelector('.name')||{value:''}).value.trim() || ('Person ' + (i+1));
@@ -500,6 +513,9 @@ function runReport(){
   Object.keys(customersMap).sort().forEach(key => {
     custIndex++;
     const cust = customersMap[key];
+    const attArr = cust.attendance ? Array.from(cust.attendance) : [];
+    const attText = attArr.length ? attArr.join(', ') : '-';
+
     let personsRows = '';
     let personsText = '';
     let gesamtSum = 0, fehlerSum = 0;
@@ -513,9 +529,43 @@ function runReport(){
 
     const qGes = gesamtSum > 0 ? (fehlerSum / gesamtSum) * 100 : 0;
     const collapseId = 'custCollapse_' + custIndex;
-    combinedHTML += '<div class="card mb-3 report-card avoid-break"><div class="print-block"><div class="card-header"><a class="text-decoration-none d-block" data-bs-toggle="collapse" href="#'+collapseId+'" role="button" aria-expanded="true" aria-controls="'+collapseId+'"><strong>Kunde #'+custIndex+ (cust.name !== '-' ? (': ' + escapeHTML(cust.name)) : '') + '</strong></a></div><div id="'+collapseId+'" class="collapse show"><div class="card-body"><div class="row mb-2"><div class="col-12 col-md-4"><strong>Kundennummer:</strong> '+ escapeHTML(cust.number || '-') +'</div><div class="col-12 col-md-4"><strong>Auftragsnummer:</strong> '+ escapeHTML(cust.order || '-') +'</div><div class="col-12 col-md-4"><strong>Anmerkung:</strong> -</div></div><div class="table-responsive"><table class="table table-sm table-bordered mb-2 report-table avoid-break"><thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead><tbody>'+personsRows+'</tbody><tfoot><tr><th>Summe</th><th>'+gesamtSum+'</th><th>'+fehlerSum+'</th><th>'+qGes.toFixed(2)+' %</th></tr></tfoot></table></div></div></div></div></div>';
 
-    combinedText += 'Kunde: ' + (cust.name !== '-' ? cust.name : '-') + '\n' + 'Kundennummer: ' + (cust.number || '-') + '\n' + 'Auftragsnummer: ' + (cust.order || '-') + '\n' + personsText + 'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %\n\n';
+    // HTML-Block mit Anwesenheitstagen (ersetzt die vorherige "Anmerkung:-" Spalte)
+    combinedHTML += '' +
+      '<div class="card mb-3 report-card avoid-break">' +
+        '<div class="print-block">' +
+          '<div class="card-header">' +
+            '<a class="text-decoration-none d-block" data-bs-toggle="collapse" href="#'+collapseId+'" role="button" aria-expanded="true" aria-controls="'+collapseId+'">' +
+              '<strong>Kunde #'+custIndex+ (cust.name !== '-' ? (': ' + escapeHTML(cust.name)) : '') + '</strong>' +
+            '</a>' +
+          '</div>' +
+          '<div id="'+collapseId+'" class="collapse show">' +
+            '<div class="card-body">' +
+              '<div class="row mb-2">' +
+                '<div class="col-12 col-md-4"><strong>Kundennummer:</strong> '+ escapeHTML(cust.number || '-') +'</div>' +
+                '<div class="col-12 col-md-4"><strong>Auftragsnummer:</strong> '+ escapeHTML(cust.order || '-') +'</div>' +
+                '<div class="col-12 col-md-4"><strong>Anwesenheitstage:</strong> '+ escapeHTML(attText) +'</div>' +
+              '</div>' +
+              '<div class="table-responsive">' +
+                '<table class="table table-sm table-bordered mb-2 report-table avoid-break">' +
+                  '<thead><tr><th>Person</th><th>Prüfungen</th><th>Nicht bestanden</th><th>Fehlerquote</th></tr></thead>' +
+                  '<tbody>'+personsRows+'</tbody>' +
+                  '<tfoot><tr><th>Summe</th><th>'+gesamtSum+'</th><th>'+fehlerSum+'</th><th>'+qGes.toFixed(2)+' %</th></tr></tfoot>' +
+                '</table>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    // Text-Block mit Anwesenheitstagen
+    combinedText +=
+      'Kunde: ' + (cust.name !== '-' ? cust.name : '-') + '\n' +
+      'Kundennummer: ' + (cust.number || '-') + '\n' +
+      'Auftragsnummer: ' + (cust.order || '-') + '\n' +
+      'Anwesenheitstage: ' + attText + '\n' +
+      personsText +
+      'Summe: Prüfungen: ' + gesamtSum + ', Nicht bestanden: ' + fehlerSum + ', Fehlerquote: ' + qGes.toFixed(2) + ' %\n\n';
   });
 
   const allQuote = allGesamt > 0 ? (allFehler / allGesamt) * 100 : 0;
